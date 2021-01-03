@@ -1,0 +1,21 @@
+{
+  "name": "threejs-outlines-postprocess",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "parcel index.html",
+    "build": "parcel build index.html",
+    "prettier": "prettier --write \"src/**/*.js\""
+  },
+  "dependencies": {
+    "three": "^0.124.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/plugin-transform-runtime": "^7.12.10",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-static-files-copy": "^2.5.0",
+    "prettier": "^2.2.1"
+  }
+}
