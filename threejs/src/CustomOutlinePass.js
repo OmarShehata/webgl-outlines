@@ -25,6 +25,8 @@ class CustomOutlinePass extends Pass {
     normalTarget.texture.generateMipmaps = false;
     normalTarget.stencilBuffer = false;
     this.normalTarget = normalTarget;
+
+    this.normalOverrideMaterial = new THREE.MeshNormalMaterial();
   }
 
   dispose() {
@@ -35,11 +37,13 @@ class CustomOutlinePass extends Pass {
   setSize(width, height) {
     this.normalTarget.setSize(width, height);
     this.resolution.set(width, height);
+
     this.fsQuad.material.uniforms.screenSize.value.set(
       this.resolution.x,
       this.resolution.y,
       1 / this.resolution.x,
-      1 / this.resolution.y);
+      1 / this.resolution.y
+    );
   }
 
   render(renderer, writeBuffer, readBuffer) {
@@ -54,7 +58,7 @@ class CustomOutlinePass extends Pass {
     renderer.setRenderTarget(this.normalTarget);
 
     const overrideMaterialValue = this.renderScene.overrideMaterial;
-    this.renderScene.overrideMaterial = new THREE.MeshNormalMaterial();
+    this.renderScene.overrideMaterial = this.normalOverrideMaterial;
     renderer.render(this.renderScene, this.renderCamera);
     this.renderScene.overrideMaterial = overrideMaterialValue;
 
@@ -63,7 +67,8 @@ class CustomOutlinePass extends Pass {
     this.fsQuad.material.uniforms[
       "normalBuffer"
     ].value = this.normalTarget.texture;
-    this.fsQuad.material.uniforms["sceneColorBuffer"].value = readBuffer.texture;
+    this.fsQuad.material.uniforms["sceneColorBuffer"].value =
+      readBuffer.texture;
 
     // 2. Draw the outlines using the depth texture and normal texture
     // and combine it with the scene color
@@ -202,7 +207,7 @@ class CustomOutlinePass extends Pass {
         sceneColorBuffer: {},
         depthBuffer: {},
         normalBuffer: {},
-        outlineColor: { value: new THREE.Color( 0xffffff ) },
+        outlineColor: { value: new THREE.Color(0xffffff) },
         //4 scalar values packed in one uniform: depth multiplier, depth bias, and same for normals.
         multiplierParameters: { value: new THREE.Vector4(1, 1, 1, 1) },
         cameraNear: { value: this.renderCamera.near },

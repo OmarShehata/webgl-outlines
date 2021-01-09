@@ -7,6 +7,7 @@ import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 
 import { CustomOutlinePass } from "./CustomOutlinePass.js";
+import DragAndDropModels from "./DragAndDropModels.js";
 
 const GUI = dat.GUI;
 
@@ -56,16 +57,14 @@ composer.addPass(customOutline);
 // Antialias pass.
 const effectFXAA = new ShaderPass(FXAAShader);
 effectFXAA.uniforms["resolution"].value.set(
-  1 / (window.innerWidth),
-  1 / (window.innerHeight)
+  1 / window.innerWidth,
+  1 / window.innerHeight
 );
 composer.addPass(effectFXAA);
 
 // Load model
 const loader = new GLTFLoader();
-let model;
 loader.load("box.glb", (gltf) => {
-  model = gltf.scene;
   scene.add(gltf.scene);
 });
 
@@ -86,17 +85,17 @@ function onWindowResize() {
 
   renderer.setSize(window.innerWidth, window.innerHeight);
   composer.setSize(window.innerWidth, window.innerHeight);
-  effectFXAA.setSize(window.innerWidth, window.innerHeight)
+  effectFXAA.setSize(window.innerWidth, window.innerHeight);
+  customOutline.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener("resize", onWindowResize, false);
 
-
 // Set up GUI controls
-const gui = new GUI( { width: 300 } );
+const gui = new GUI({ width: 300 });
 const params = {
   mode: { Mode: 0 },
   FXAA: true,
-  outlineColor: 0xFFFFFF,
+  outlineColor: 0xffffff,
   depthBias: 1,
   depthMult: 1,
   normalBias: 1,
@@ -104,29 +103,31 @@ const params = {
 };
 
 const uniforms = customOutline.fsQuad.material.uniforms;
-gui.add(params.mode, 'Mode', { 
-  'Outlines': 0, 
-  'Original scene': 1,
-  'Depth buffer': 2, 
-  'Normal buffer': 3
-} ).onChange( function ( value ) {
-  uniforms.debugVisualize.value = value;
-});
+gui
+  .add(params.mode, "Mode", {
+    Outlines: 0,
+    "Original scene": 1,
+    "Depth buffer": 2,
+    "Normal buffer": 3,
+  })
+  .onChange(function (value) {
+    uniforms.debugVisualize.value = value;
+  });
 
-gui.addColor( params, 'outlineColor' ).onChange( function(value) {
+gui.addColor(params, "outlineColor").onChange(function (value) {
   uniforms.outlineColor.value.set(value);
 });
 
-gui.add( params, 'depthBias', 0.0, 5 ).onChange( function ( value ) {
+gui.add(params, "depthBias", 0.0, 5).onChange(function (value) {
   uniforms.multiplierParameters.value.x = value;
 });
-gui.add( params, 'depthMult', 0.0, 10 ).onChange( function ( value ) {
+gui.add(params, "depthMult", 0.0, 10).onChange(function (value) {
   uniforms.multiplierParameters.value.y = value;
 });
-gui.add( params, 'normalBias', 0.0, 5 ).onChange( function ( value ) {
+gui.add(params, "normalBias", 0.0, 5).onChange(function (value) {
   uniforms.multiplierParameters.value.z = value;
 });
-gui.add( params, 'normalMult', 0.0, 10 ).onChange( function ( value ) {
+gui.add(params, "normalMult", 0.0, 10).onChange(function (value) {
   uniforms.multiplierParameters.value.w = value;
 });
 
@@ -134,3 +135,7 @@ gui.add( params, 'normalMult', 0.0, 10 ).onChange( function ( value ) {
 // gui.add(params, 'FXAA').onChange( function ( value ) {
 //   effectFXAA.enabled = value;
 // });;
+
+// Allow drag and drop models to visualize them with outlines
+const dropZoneElement = document.querySelector("body");
+DragAndDropModels(scene, dropZoneElement);

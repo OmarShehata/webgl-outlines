@@ -1,7 +1,16 @@
 # How to render outlines in WebGL
 
-* Link to article + brief description from it: https://medium.com/p/8253c14724f9/edit
-* Include picture(s) of the technique
-* Link to live demo
-* How to run it locally
-* Link to another README describing the technique in PlayCanvas. 
+This is the source code for [How to render outlines in WebGL](TODO) implemented in ThreeJS and PlayCanvas. This renders outlines with a post-process shader that takes the depth buffer and a surface normal buffer as inputs, followed by an FXAA pass. This produces a full outline of the model, not just an outer boundary.
+
+![Three versions of a boat 3D model showing the different outline techniques](media/boat_outline_3_versions.jpeg)_Left is a common way to visualize outlines. Middle is this technique. Right is same technique, outlines only. Boat model by [Google Poly](https://poly.google.com/view/84-DYhLzxNq)_
+
+### Live demo
+
+See the ThreeJS version on CodeSandbox here: TODO.
+
+Drag and drop any glTF file to see the outlines on your own models.
+
+### Running it locally
+
+* [Instructions for the ThreeJS version](threejs/README.md)
+* [Instructions for the PlayCanvas version](playcanvas/README.md)
