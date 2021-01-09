@@ -6,9 +6,9 @@ This is the source code for [How to render outlines in WebGL](TODO) implemented 
 
 ### Live demo
 
-See the ThreeJS version on CodeSandbox here: TODO.
+See [ThreeJS version on CodeSandbox](https://l01dp.csb.app/). 
 
-Drag and drop any glTF file to see the outlines on your own models.
+Drag and drop any glTF file to see the outlines on your own models (must be a single `.glb` file).
 
 ### Running it locally
 
