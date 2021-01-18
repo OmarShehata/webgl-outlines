@@ -4,10 +4,6 @@ app.start();
 app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
 app.setCanvasResolution(pc.RESOLUTION_AUTO);
 
-window.addEventListener("resize", function () {
-    app.resizeCanvas(canvas.width, canvas.height);
-});
-
 var modelUrl = "box.glb";
 var camera;
 var outlineEffect;
@@ -52,9 +48,13 @@ app.assets.loadFromUrl(modelUrl, "container", function (err, asset) {
         }
     });
 
-
     setupOutlinePostProcess();
     setupFXAAPostProcess();
+
+    window.addEventListener("resize", function () {
+        app.resizeCanvas(canvas.width, canvas.height);
+        recreateOutlineEffect();
+    });
 });
 
 function setupOutlinePostProcess() {
@@ -94,7 +94,7 @@ function setupOutlinePostProcess() {
     
     // Create the outline effect, which needs a reference to the normal buffer of the scene.
     var colorBuffer = normalPassLayer.renderTarget.colorBuffer;
-    var outlineEffect = new pc.OutlineEffect(
+    outlineEffect = new pc.OutlineEffect(
         app.graphicsDevice, 
         colorBuffer,  
         {
@@ -139,7 +139,7 @@ function recreateOutlineEffect() {
     normalPassLayer.renderTarget = createRt();
     var colorBuffer = normalPassLayer.renderTarget.colorBuffer;
 
-    var queue = camera.postEffects;
+    var queue = camera.camera.postEffects;
     queue.removeEffect(outlineEffect);
     outlineEffect = new pc.OutlineEffect(
         app.graphicsDevice, 
