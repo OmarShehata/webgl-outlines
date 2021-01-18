@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PlayCanvas Model Outline</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/playcanvas@1.38.2/build/playcanvas.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow-y: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="application-canvas"></canvas>
+    <script>
+        var canvas = document.getElementById("application-canvas");
+        // Create the app and start the update loop
+        var app = new pc.Application(canvas);
+    </script>
+    <script src="src/outline-post-process.js"></script>
+    <script src="src/fxaa-post-process.js"></script>
+    <script src="src/index.js"></script>
+</body>
+</html>
