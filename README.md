@@ -13,7 +13,7 @@ See [ThreeJS version on CodeSandbox](https://l01dp.csb.app/).
 
 Drag and drop any glTF file to see the outlines on your own models (must be a single `.glb` file).
 
-### Running it locally
+### Source code
 
-* [Instructions for the ThreeJS version](threejs/README.md)
-* [Instructions for the PlayCanvas version](playcanvas/README.md)
+* [ThreeJS version](threejs/README.md)
+* [PlayCanvas version](playcanvas/README.md)
