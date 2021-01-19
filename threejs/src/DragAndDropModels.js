@@ -1,4 +1,5 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import * as THREE from "three";
 
 const gltfLoader = new GLTFLoader();
 
@@ -44,6 +45,10 @@ export default function DragAndDropModels(
     const ext = getExtension(entryFile.name);
     const fileUrl = URL.createObjectURL(entryFile);
     scene.clear();
+    // Re-add the light
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    scene.add(light);
+    light.position.set(1.7, 1, -1);
     gltfLoader.load(fileUrl, (gltf) => {
       scene.add(gltf.scene);
     });

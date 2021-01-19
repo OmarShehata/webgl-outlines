@@ -7,3 +7,4 @@
 * Caveats
 	* There's some debug code in there for rendering normals/depth. 
 	* Would be more efficient by getting the normal buffer from the engine
+	* The FXAA thing. Not needed in theory....but ThreeJS can't output depth then?

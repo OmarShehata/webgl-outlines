@@ -109,6 +109,7 @@ gui
     "Original scene": 1,
     "Depth buffer": 2,
     "Normal buffer": 3,
+    "Outlines only": 4,
   })
   .onChange(function (value) {
     uniforms.debugVisualize.value = value;
