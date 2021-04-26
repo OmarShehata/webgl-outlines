@@ -9,9 +9,11 @@ This is the source code for [How to render outlines in WebGL](https://omar-sheha
 * **Right** is same as middle with outlines only.
 ### Live demo
 
-See [ThreeJS version on CodeSandbox](https://l01dp.csb.app/). 
+See [live ThreeJS version](https://omarshehata.github.io/csb-l01dp/). 
 
 Drag and drop any glTF file to see the outlines on your own models (must be a single `.glb` file).
+
+Or click "Login to Sketchfab" and paste in any Sketchfab model URL, such as: https://sketchfab.com/3d-models/low-poly-tree-6d986e0b24b54d85a5354e5cac6207a1
 
 ### Source code
 
