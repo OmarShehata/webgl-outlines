@@ -13,7 +13,7 @@ See [live ThreeJS version](https://omarshehata.github.io/csb-l01dp/).
 
 Drag and drop any glTF file to see the outlines on your own models (must be a single `.glb` file).
 
-Or click "Login to Sketchfab" and paste in any Sketchfab model URL, such as: https://sketchfab.com/3d-models/low-poly-tree-6d986e0b24b54d85a5354e5cac6207a1
+Or click "Login to Sketchfab" and paste in any Sketchfab model URL, such as: https://sketchfab.com/3d-models/skull-downloadable-1a9db900738d44298b0bc59f68123393
 
 ### Source code
 
