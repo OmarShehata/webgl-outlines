@@ -19,3 +19,9 @@ Or click "Login to Sketchfab" and paste in any Sketchfab model URL, such as: htt
 
 * [ThreeJS version](threejs/README.md)
 * [PlayCanvas version](playcanvas/README.md)
+
+### Applying outlines selectively to objects
+
+If you want to apply the outline effect to specific objects, instead of all objects in the scene, an example ThreeJS implementation is documented here: https://github.com/OmarShehata/webgl-outlines/pull/3.
+
+![outline_selected](https://user-images.githubusercontent.com/1711126/124300669-cd0a9980-db2c-11eb-9d58-b55ce80cf95a.gif)
