@@ -10,6 +10,7 @@ import { CustomOutlinePass } from "./CustomOutlinePass.js";
 import DragAndDropModels from "./DragAndDropModels.js";
 
 const GUI = dat.GUI;
+window.THREE = THREE;
 
 // Init scene
 const camera = new THREE.PerspectiveCamera(
@@ -18,12 +19,15 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
+window.camera = camera;
 camera.position.set(1, 1, -2);
 const scene = new THREE.Scene();
+window.scene = scene;
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector("canvas"),
 });
 renderer.setSize(window.innerWidth, window.innerHeight);
+//renderer.autoClearDepth = false;
 const light = new THREE.DirectionalLight(0xffffff, 1);
 scene.add(light);
 light.position.set(1.7, 1, -1);
@@ -41,31 +45,81 @@ const renderTarget = new THREE.WebGLRenderTarget(
   }
 );
 
-// Initial render pass.
 const composer = new EffectComposer(renderer, renderTarget);
+
+// Render pass for objects that won't have outline
+// const passNoOutlines = new RenderPass(scene, camera);
+// passNoOutlines.oldRender = passNoOutlines.render;
+// passNoOutlines.render = function(renderer, writeBuffer, readBuffer) {
+//   this.oldRender(renderer, writeBuffer, readBuffer);
+// }
+// composer.addPass(passNoOutlines);
+
+// Render pass for objects with outline
 const pass = new RenderPass(scene, camera);
 composer.addPass(pass);
+pass.oldRender = pass.render;
+pass.render = function(renderer, writeBuffer, readBuffer) {
+  scene.traverse( function( node ) {
+    // We want objects that DO have outline 
+    // to appear in the color buffer here
+    // but NOT in the depth buffer
+    // SO we keep them visible but turn off depth write
+        if (node.applyOutline == true && node.type == 'Mesh') {
+          node.oldDepthWriteValue = node.material.depthWrite;
+          node.material.depthWrite = false;
+        }
+    });
+
+  this.oldRender(renderer, writeBuffer, readBuffer);
+
+  scene.traverse( function( node ) {
+        if (node.applyOutline == true && node.type == 'Mesh' && node.oldDepthWriteValue != undefined) {
+          node.material.depthWrite = node.oldDepthWriteValue;
+        }
+    });
+}
 
 // Outline pass.
 const customOutline = new CustomOutlinePass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   scene,
-  camera
+  camera,
+  depthTexture
 );
 composer.addPass(customOutline);
 
 // Antialias pass.
 const effectFXAA = new ShaderPass(FXAAShader);
+const pixelRatio = renderer.getPixelRatio();
 effectFXAA.uniforms["resolution"].value.set(
-  1 / window.innerWidth,
-  1 / window.innerHeight
+  1 / window.innerWidth * pixelRatio,
+  1 / window.innerHeight * pixelRatio
 );
 composer.addPass(effectFXAA);
 
 // Load model
 const loader = new GLTFLoader();
 loader.load("box.glb", (gltf) => {
-  scene.add(gltf.scene);
+  const mesh1 = gltf.scene; scene.add(mesh1);
+
+  const mesh2 = mesh1.clone(); scene.add(mesh2);
+  mesh2.traverse(node => {
+    if (node.material) {
+      node.material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    }
+  })
+
+  mesh2.position.x = -2;
+  mesh2.position.y = 1;
+  mesh2.position.z = 2;
+  mesh2.rotateZ(5);
+  mesh2.rotateY(5);
+
+  window.mesh1 = mesh1;
+  window.mesh2 = mesh2;
+
+  mesh2.traverse(node => node.applyOutline = true);
 });
 
 // Set up orbital camera controls.
@@ -100,6 +154,8 @@ const params = {
   depthMult: 1,
   normalBias: 1,
   normalMult: 1.0,
+  object1: true, 
+  object2: false
 };
 
 const uniforms = customOutline.fsQuad.material.uniforms;
@@ -108,6 +164,7 @@ gui
     Outlines: 0,
     "Original scene": 1,
     "Depth buffer": 2,
+    "Original depth": 5,
     "Normal buffer": 3,
     "Outlines only": 4,
   })
@@ -130,6 +187,13 @@ gui.add(params, "normalBias", 0.0, 5).onChange(function (value) {
 });
 gui.add(params, "normalMult", 0.0, 10).onChange(function (value) {
   uniforms.multiplierParameters.value.w = value;
+});
+
+gui.add(params, "object1").onChange(function (value) {
+  mesh2.traverse(node => node.applyOutline = value);
+});
+gui.add(params, "object2").onChange(function (value) {
+  mesh1.traverse(node => node.applyOutline = value);
 });
 
 // Toggling this causes the outline shader to fail sometimes. Not sure why.
