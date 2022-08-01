@@ -9,7 +9,7 @@
     "prettier": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
-    "three": "^0.124.0"
+    "three": "^0.143.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",
