@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { Pass } from "three/examples/jsm/postprocessing/Pass.js";
+import { FullScreenQuad } from "three/examples/jsm/postprocessing/Pass.js";
 
 // Follows the structure of
 // 		https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/OutlinePass.js
@@ -11,7 +12,7 @@ class CustomOutlinePass extends Pass {
 		this.renderCamera = camera;
 		this.resolution = new THREE.Vector2(resolution.x, resolution.y);
 
-		this.fsQuad = new Pass.FullScreenQuad(null);
+		this.fsQuad = new FullScreenQuad(null);
 		this.fsQuad.material = this.createOutlinePostProcessMaterial();
 
 		// Create a buffer to store the normals of the scene onto
