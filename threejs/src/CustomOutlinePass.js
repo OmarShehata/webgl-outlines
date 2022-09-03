@@ -20,7 +20,7 @@ class CustomOutlinePass extends Pass {
 			this.resolution.x,
 			this.resolution.y
 		);
-		normalTarget.texture.format = THREE.RGBFormat;
+		normalTarget.texture.format = THREE.RGBAFormat;
 		normalTarget.texture.minFilter = THREE.NearestFilter;
 		normalTarget.texture.magFilter = THREE.NearestFilter;
 		normalTarget.texture.generateMipmaps = false;
