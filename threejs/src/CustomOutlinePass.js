@@ -25,7 +25,26 @@ class CustomOutlinePass extends Pass {
 		normalTarget.texture.magFilter = THREE.NearestFilter;
 		normalTarget.texture.generateMipmaps = false;
 		normalTarget.stencilBuffer = false;
+		// This stores the depth buffer containing 
+		// only objects that will have outlines
+		normalTarget.depthBuffer = true;
+		normalTarget.depthTexture = new THREE.DepthTexture();
+		normalTarget.depthTexture.type = THREE.UnsignedShortType;
+
 		this.normalTarget = normalTarget;
+		// Create a buffer to store the depth of the scene 
+		// we don't use the default depth buffer because
+		// this one includes only objects that have the outline applied
+		const depthTarget = new THREE.WebGLRenderTarget( this.resolution.x, this.resolution.y );
+		depthTarget.texture.format = THREE.RGBFormat;
+		depthTarget.texture.minFilter = THREE.NearestFilter;
+		depthTarget.texture.magFilter = THREE.NearestFilter;
+		depthTarget.texture.generateMipmaps = false;
+		depthTarget.stencilBuffer = false;
+		depthTarget.depthBuffer = true;
+		depthTarget.depthTexture = new THREE.DepthTexture();
+		depthTarget.depthTexture.type = THREE.UnsignedShortType;
+		this.depthTarget = depthTarget;
 
 		this.normalOverrideMaterial = new THREE.MeshNormalMaterial();
 	}
@@ -47,6 +66,67 @@ class CustomOutlinePass extends Pass {
 		);
 	}
 
+	// Helper functions for hiding/showing objects based on whether they should have outlines applied 
+	setOutlineObjectsVisibile(bVisible) {
+		this.renderScene.traverse( function( node ) {
+		    if (node.applyOutline == true && node.type == 'Mesh') {
+
+		    	if (!bVisible) {
+		    		node.oldVisibleValue = node.visible;
+		    		node.visible = false;
+		    	} else {
+		    		// Restore original visible value. This way objects
+		    		// that were originally hidden stay hidden
+		    		if (node.oldVisibleValue != undefined) {
+		    			node.visible = node.oldVisibleValue;
+		    			delete node.oldVisibleValue;
+		    		}
+		    	}
+		    	
+		    	
+		    }
+		});
+	}
+
+	setNonOutlineObjectsVisible(bVisible) {
+		this.renderScene.traverse( function( node ) {
+		    if (node.applyOutline != true && node.type == 'Mesh') {
+
+		    	if (!bVisible) {
+		    		node.oldVisibleValue = node.visible;
+		    		node.visible = false;
+		    	} else {
+		    		// Restore original visible value. This way objects
+		    		// that were originally hidden stay hidden
+		    		if (node.oldVisibleValue != undefined) {
+		    			node.visible = node.oldVisibleValue;
+		    			delete node.oldVisibleValue;
+		    		}
+		    	}
+		    	
+		    	
+		    }
+		});
+	}
+
+	/*
+
+	This is a modified pipeline from the original outlines effect
+	to support outlining individual objects.
+
+	1 - Render all objects to get final color buffer, with regular depth buffer
+		(this is done in index.js)
+
+	2 - Render only non-outlines objects to get `nonOutlinesDepthBuffer`.
+		(we need this to depth test our outlines so they render behind objects)
+
+	3 - Render all outlines objects to get normal buffer & depth buffer, which are inputs for the outline effect. 
+		This must NOT include objects that won't have outlines applied.
+
+	4 - Render outline effect, using normal and depth buffer that contains only outline objects,
+		 use the `nonOutlinesDepthBuffer` for depth test. And finally combine with the final color buffer.
+	*/
+
 	render(renderer, writeBuffer, readBuffer) {
 		// Turn off writing to the depth buffer
 		// because we need to read from it in the subsequent passes.
@@ -60,18 +140,31 @@ class CustomOutlinePass extends Pass {
 
 		const overrideMaterialValue = this.renderScene.overrideMaterial;
 		this.renderScene.overrideMaterial = this.normalOverrideMaterial;
+		// Only include objects that have the "applyOutline" property. 
+		// We do this by hiding all other objects temporarily.
+		this.setNonOutlineObjectsVisible(false);
 		renderer.render(this.renderScene, this.renderCamera);
+		this.setNonOutlineObjectsVisible(true);
+
 		this.renderScene.overrideMaterial = overrideMaterialValue;
 
-		this.fsQuad.material.uniforms["depthBuffer"].value =
-			readBuffer.depthTexture;
+		// 2. Re-render the scene to capture depth of objects that do NOT have outlines
+		renderer.setRenderTarget(this.depthTarget);
+
+		this.setOutlineObjectsVisibile(false);
+		renderer.render(this.renderScene, this.renderCamera);
+		this.setOutlineObjectsVisibile(true);
+
+		this.fsQuad.material.uniforms["depthBuffer"].value = this.normalTarget.depthTexture;
+
 		this.fsQuad.material.uniforms[
 			"normalBuffer"
 		].value = this.normalTarget.texture;
 		this.fsQuad.material.uniforms["sceneColorBuffer"].value =
 			readBuffer.texture;
+		this.fsQuad.material.uniforms["nonOutlinesDepthBuffer"].value = this.depthTarget.depthTexture;
 
-		// 2. Draw the outlines using the depth texture and normal texture
+		// 3. Draw the outlines using the depth texture and normal texture
 		// and combine it with the scene color
 		if (this.renderToScreen) {
 			// If this is the last effect, then renderToScreen is true.
@@ -105,6 +198,7 @@ class CustomOutlinePass extends Pass {
 			uniform sampler2D sceneColorBuffer;
 			uniform sampler2D depthBuffer;
 			uniform sampler2D normalBuffer;
+			uniform sampler2D nonOutlinesDepthBuffer;
 			uniform float cameraNear;
 			uniform float cameraFar;
 			uniform vec4 screenSize;
@@ -145,6 +239,7 @@ class CustomOutlinePass extends Pass {
 			void main() {
 				vec4 sceneColor = texture2D(sceneColorBuffer, vUv);
 				float depth = getPixelDepth(0, 0);
+				float nonOutlinesDepth = readDepth(nonOutlinesDepthBuffer, vUv + screenSize.zw);
 				vec3 normal = getPixelNormal(0, 0);
 
 				// Get the difference between depth of neighboring pixels and current.
@@ -182,6 +277,13 @@ class CustomOutlinePass extends Pass {
 
 
 				float outline = normalDiff + depthDiff;
+
+				// Don't render outlines if they are behind something
+				// in the original depth buffer 
+				// we find this out by comparing the depth value of current pixel 
+				if ( depth > nonOutlinesDepth && debugVisualize != 4) {
+					outline = 0.0;
+				}
 			
 				// Combine outline with scene color.
 				vec4 outlineColor = vec4(outlineColor, 1.0);
@@ -193,6 +295,9 @@ class CustomOutlinePass extends Pass {
 				}
 				if (debugVisualize == 2) {
 					gl_FragColor = vec4(vec3(depth), 1.0);
+				}
+				if (debugVisualize == 5) {
+					gl_FragColor = vec4(vec3(nonOutlinesDepth), 1.0);
 				}
 				if (debugVisualize == 3) {
 					gl_FragColor = vec4(normal, 1.0);
@@ -211,6 +316,7 @@ class CustomOutlinePass extends Pass {
 				sceneColorBuffer: {},
 				depthBuffer: {},
 				normalBuffer: {},
+				nonOutlinesDepthBuffer: {},
 				outlineColor: { value: new THREE.Color(0xffffff) },
 				//4 scalar values packed in one uniform: depth multiplier, depth bias, and same for normals.
 				multiplierParameters: { value: new THREE.Vector4(1, 1, 1, 1) },

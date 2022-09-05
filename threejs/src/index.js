@@ -28,20 +28,12 @@ const light = new THREE.DirectionalLight(0xffffff, 1);
 scene.add(light);
 light.position.set(1.7, 1, -1);
 
-// Set up post processing
-// Create a render target that holds a depthTexture so we can use it in the outline pass
-// See: https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderTarget.depthBuffer
-const depthTexture = new THREE.DepthTexture();
 const renderTarget = new THREE.WebGLRenderTarget(
   window.innerWidth,
-  window.innerHeight,
-  {
-    depthTexture: depthTexture,
-    depthBuffer: true,
-  }
+  window.innerHeight
 );
 
-// Initial render pass.
+// Regular scene render pass. This is step 1 in the pipeline described in CustomOutlinePass.js
 const composer = new EffectComposer(renderer, renderTarget);
 const pass = new RenderPass(scene, camera);
 composer.addPass(pass);
@@ -65,7 +57,27 @@ composer.addPass(effectFXAA);
 // Load model
 const loader = new GLTFLoader();
 loader.load("box.glb", (gltf) => {
-  scene.add(gltf.scene);
+  // Create a second mesh to test 
+  // selectively applying outline effect
+  const mesh1 = gltf.scene; scene.add(mesh1);
+
+  const mesh2 = mesh1.clone(); scene.add(mesh2);
+  mesh2.traverse(node => {
+    if (node.material) {
+      node.material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    }
+  })
+
+  mesh2.position.x = -2;
+  mesh2.position.y = 1;
+  mesh2.position.z = 2;
+  mesh2.rotateZ(5);
+  mesh2.rotateY(5);
+
+  window.mesh1 = mesh1;
+  window.mesh2 = mesh2;
+
+  mesh2.traverse(node => node.applyOutline = true);
 });
 
 // Set up orbital camera controls.
@@ -100,6 +112,8 @@ const params = {
   depthMult: 1,
   normalBias: 1,
   normalMult: 1.0,
+  object1: true, 
+  object2: false
 };
 
 const uniforms = customOutline.fsQuad.material.uniforms;
@@ -108,6 +122,7 @@ gui
     Outlines: 0,
     "Original scene": 1,
     "Depth buffer": 2,
+    "Non-outlines depth": 5,
     "Normal buffer": 3,
     "Outlines only": 4,
   })
@@ -130,6 +145,13 @@ gui.add(params, "normalBias", 0.0, 5).onChange(function (value) {
 });
 gui.add(params, "normalMult", 0.0, 10).onChange(function (value) {
   uniforms.multiplierParameters.value.w = value;
+});
+
+gui.add(params, "object1").onChange(function (value) {
+  mesh2.traverse(node => node.applyOutline = value);
+});
+gui.add(params, "object2").onChange(function (value) {
+  mesh1.traverse(node => node.applyOutline = value);
 });
 
 // Toggling this causes the outline shader to fail sometimes. Not sure why.
