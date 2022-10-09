@@ -4,13 +4,10 @@ import * as THREE from "three";
 const gltfLoader = new GLTFLoader();
 
 function getExtension(filename) {
-  return filename.toLowerCase().split('.').pop();
+  return filename.toLowerCase().split(".").pop();
 }
 
-export default function DragAndDropModels(
-  scene,
-  dropZoneElement
-) {
+export default function DragAndDropModels(scene, dropZoneElement, onDrop) {
   dropZoneElement.ondragenter = function (event) {
     event.preventDefault();
   };
@@ -37,21 +34,19 @@ export default function DragAndDropModels(
       files = event.dataTransfer.files;
     }
 
-    let entryFile = files.find(f => getExtension(f.name) === 'glb');
+    let entryFile = files.find((f) => getExtension(f.name) === "glb");
+    if (entryFile == undefined) {
+      entryFile = files.find((f) => getExtension(f.name) === "gltf");
+    }
 
     if (entryFile == undefined) {
-      console.error('Could not find any supported 3D model files. .glb files are supported.')
+      console.error(
+        "Could not find any supported 3D model files. .glb/.gltf files are supported."
+      );
     }
     const ext = getExtension(entryFile.name);
     const fileUrl = URL.createObjectURL(entryFile);
-    scene.clear();
-    // Re-add the light
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    scene.add(light);
-    light.position.set(1.7, 1, -1);
-    gltfLoader.load(fileUrl, (gltf) => {
-      scene.add(gltf.scene);
-    });
-  
+
+    onDrop(fileUrl)
   };
 }

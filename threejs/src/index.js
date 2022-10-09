@@ -8,6 +8,7 @@ import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 
 import { CustomOutlinePass } from "./CustomOutlinePass.js";
 import DragAndDropModels from "./DragAndDropModels.js";
+import FindSurfaces from "./FindSurfaces.js";
 
 const GUI = dat.GUI;
 
@@ -16,9 +17,10 @@ const camera = new THREE.PerspectiveCamera(
   70,
   window.innerWidth / window.innerHeight,
   0.1,
-  1000
+  100
 );
-camera.position.set(1, 1, -2);
+camera.position.set(10, 2.5, 4);
+
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer({
   canvas: document.querySelector("canvas"),
@@ -37,7 +39,7 @@ const renderTarget = new THREE.WebGLRenderTarget(
   window.innerHeight,
   {
     depthTexture: depthTexture,
-    depthBuffer: true,
+    depthBuffer: true
   }
 );
 
@@ -62,11 +64,31 @@ effectFXAA.uniforms["resolution"].value.set(
 );
 composer.addPass(effectFXAA);
 
+
+const surfaceFinder = new FindSurfaces();
 // Load model
 const loader = new GLTFLoader();
-loader.load("box.glb", (gltf) => {
+const model = "box_with_plane.glb"
+loader.load(model, (gltf) => {
   scene.add(gltf.scene);
+  addSurfaceIdAttributeToMesh(gltf.scene);
 });
+
+function addSurfaceIdAttributeToMesh(scene) {
+  surfaceFinder.surfaceId = 0;
+
+  scene.traverse((node) => {
+    if (node.type == "Mesh") {
+      const colorsTypedArray = surfaceFinder.getSurfaceIdAttribute(node);
+      node.geometry.setAttribute(
+        "color",
+        new THREE.BufferAttribute(colorsTypedArray, 4)
+      );
+    }
+  });
+
+  customOutline.updateMaxSurfaceId(surfaceFinder.surfaceId)
+}
 
 // Set up orbital camera controls.
 let controls = new OrbitControls(camera, renderer.domElement);
@@ -92,28 +114,34 @@ window.addEventListener("resize", onWindowResize, false);
 
 // Set up GUI controls
 const gui = new GUI({ width: 300 });
+const uniforms = customOutline.fsQuad.material.uniforms;
 const params = {
   mode: { Mode: 0 },
   FXAA: true,
   outlineColor: 0xffffff,
-  depthBias: 1,
-  depthMult: 1,
-  normalBias: 1,
-  normalMult: 1.0,
+  depthBias: uniforms.multiplierParameters.value.x,
+  depthMult: uniforms.multiplierParameters.value.y,
+  normalBias: uniforms.multiplierParameters.value.z,
+  normalMult: uniforms.multiplierParameters.value.w,
+  cameraNear: camera.near,
+  cameraFar: camera.far
 };
 
-const uniforms = customOutline.fsQuad.material.uniforms;
 gui
   .add(params.mode, "Mode", {
-    Outlines: 0,
-    "Original scene": 1,
-    "Depth buffer": 2,
-    "Normal buffer": 3,
-    "Outlines only": 4,
+    "Outlines V2": 0,
+    "Outlines V1": 1,
+    "Original scene": 2,
+    "Depth buffer": 3,
+    "Normal buffer": 4,
+    "SurfaceID debug buffer": 5,
+    "Outlines only V2": 6,
+    "Outlines only V1": 7,
   })
   .onChange(function (value) {
     uniforms.debugVisualize.value = value;
   });
+
 
 gui.addColor(params, "outlineColor").onChange(function (value) {
   uniforms.outlineColor.value.set(value);
@@ -122,21 +150,40 @@ gui.addColor(params, "outlineColor").onChange(function (value) {
 gui.add(params, "depthBias", 0.0, 5).onChange(function (value) {
   uniforms.multiplierParameters.value.x = value;
 });
-gui.add(params, "depthMult", 0.0, 10).onChange(function (value) {
+gui.add(params, "depthMult", 0.0, 20).onChange(function (value) {
   uniforms.multiplierParameters.value.y = value;
 });
-gui.add(params, "normalBias", 0.0, 5).onChange(function (value) {
+gui.add(params, "normalBias", 0.0, 20).onChange(function (value) {
   uniforms.multiplierParameters.value.z = value;
 });
 gui.add(params, "normalMult", 0.0, 10).onChange(function (value) {
   uniforms.multiplierParameters.value.w = value;
 });
+gui.add(params, "cameraNear", 0.1, 1).onChange(function (value) {
+  camera.near = value;
+  camera.updateProjectionMatrix();
 
-// Toggling this causes the outline shader to fail sometimes. Not sure why.
-// gui.add(params, 'FXAA').onChange( function ( value ) {
-//   effectFXAA.enabled = value;
-// });;
+  uniforms.cameraNear.value = camera.near;
+});
+gui.add(params, "cameraFar", 1, 1000).onChange(function (value) {
+  camera.far = value;
+  camera.updateProjectionMatrix();
+
+  uniforms.cameraFar.value = camera.far;
+});
 
 // Allow drag and drop models to visualize them with outlines
 const dropZoneElement = document.querySelector("body");
-DragAndDropModels(scene, dropZoneElement);
+DragAndDropModels(scene, dropZoneElement, (modelUrl) => {
+  scene.clear();
+  // Re-add the light
+  const light = new THREE.DirectionalLight(0xffffff, 1);
+  scene.add(light);
+  light.position.set(1.7, 1, -1);
+
+  loader.load(modelUrl, (gltf) => {
+    scene.add(gltf.scene);
+    addSurfaceIdAttributeToMesh(gltf.scene);
+  });
+});
+
