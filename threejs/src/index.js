@@ -39,7 +39,7 @@ const renderTarget = new THREE.WebGLRenderTarget(
   window.innerHeight,
   {
     depthTexture: depthTexture,
-    depthBuffer: true
+    depthBuffer: true,
   }
 );
 
@@ -64,11 +64,10 @@ effectFXAA.uniforms["resolution"].value.set(
 );
 composer.addPass(effectFXAA);
 
-
 const surfaceFinder = new FindSurfaces();
 // Load model
 const loader = new GLTFLoader();
-const model = "box_with_plane.glb"
+const model = "box_with_plane.glb";
 loader.load(model, (gltf) => {
   scene.add(gltf.scene);
   addSurfaceIdAttributeToMesh(gltf.scene);
@@ -87,7 +86,7 @@ function addSurfaceIdAttributeToMesh(scene) {
     }
   });
 
-  customOutline.updateMaxSurfaceId(surfaceFinder.surfaceId)
+  customOutline.updateMaxSurfaceId(surfaceFinder.surfaceId);
 }
 
 // Set up orbital camera controls.
@@ -124,7 +123,7 @@ const params = {
   normalBias: uniforms.multiplierParameters.value.z,
   normalMult: uniforms.multiplierParameters.value.w,
   cameraNear: camera.near,
-  cameraFar: camera.far
+  cameraFar: camera.far,
 };
 
 gui
@@ -141,7 +140,6 @@ gui
   .onChange(function (value) {
     uniforms.debugVisualize.value = value;
   });
-
 
 gui.addColor(params, "outlineColor").onChange(function (value) {
   uniforms.outlineColor.value.set(value);
@@ -186,4 +184,3 @@ DragAndDropModels(scene, dropZoneElement, (modelUrl) => {
     addSurfaceIdAttributeToMesh(gltf.scene);
   });
 });
-

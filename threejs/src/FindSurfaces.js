@@ -21,7 +21,7 @@ class FindSurfaces {
   getSurfaceIdAttribute(mesh) {
     const bufferGeometry = mesh.geometry;
     const numVertices = bufferGeometry.attributes.position.count;
-    const vertexIdToSurfaceId = this._generateSurfaceIds(mesh)
+    const vertexIdToSurfaceId = this._generateSurfaceIds(mesh);
 
     const colors = [];
     for (let i = 0; i < numVertices; i++) {
@@ -32,7 +32,7 @@ class FindSurfaces {
     }
 
     const colorsTypedArray = new Float32Array(colors);
-    return colorsTypedArray
+    return colorsTypedArray;
   }
 
   /*
@@ -81,7 +81,7 @@ class FindSurfaces {
         vertexIdToSurfaceId[v] = this.surfaceId;
       }
 
-      this.surfaceId+=1;
+      this.surfaceId += 1;
     }
     function getNeighbors(node, explored) {
       const neighbors = vertexMap[node];
@@ -130,7 +130,7 @@ export default FindSurfaces;
 export function getSurfaceIdMaterial() {
   return new THREE.ShaderMaterial({
     uniforms: {
-      maxSurfaceId: { value: 1 }
+      maxSurfaceId: { value: 1 },
     },
     vertexShader: getVertexShader(),
     fragmentShader: getFragmentShader(),

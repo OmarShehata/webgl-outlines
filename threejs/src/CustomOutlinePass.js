@@ -1,7 +1,10 @@
 import * as THREE from "three";
 import { Pass } from "three/examples/jsm/postprocessing/Pass.js";
 import { FullScreenQuad } from "three/examples/jsm/postprocessing/Pass.js";
-import { getSurfaceIdMaterial, getDebugSurfaceIdMaterial } from "./FindSurfaces.js";
+import {
+  getSurfaceIdMaterial,
+  getDebugSurfaceIdMaterial,
+} from "./FindSurfaces.js";
 
 // Follows the structure of
 // 		https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/OutlinePass.js
@@ -41,7 +44,7 @@ class CustomOutlinePass extends Pass {
   }
 
   updateMaxSurfaceId(maxSurfaceId) {
-  	this.surfaceIdOverrideMaterial.uniforms.maxSurfaceId.value = maxSurfaceId;
+    this.surfaceIdOverrideMaterial.uniforms.maxSurfaceId.value = maxSurfaceId;
   }
 
   setSize(width, height) {
@@ -57,15 +60,17 @@ class CustomOutlinePass extends Pass {
   }
 
   getDebugVisualizeValue() {
-  	return this.fsQuad.material.uniforms.debugVisualize.value
+    return this.fsQuad.material.uniforms.debugVisualize.value;
   }
 
   isUsingSurfaceIds() {
-  	const debugVisualize = this.getDebugVisualizeValue();
+    const debugVisualize = this.getDebugVisualizeValue();
 
-  	return debugVisualize == 0 // Main outlines v2 mode
-  	|| debugVisualize == 5 // Render just surfaceID debug buffer
-  	|| debugVisualize == 6 // Render just outlines with surfaceId
+    return (
+      debugVisualize == 0 || // Main outlines v2 mode
+      debugVisualize == 5 || // Render just surfaceID debug buffer
+      debugVisualize == 6
+    ); // Render just outlines with surfaceId
   }
 
   render(renderer, writeBuffer, readBuffer) {
@@ -79,17 +84,17 @@ class CustomOutlinePass extends Pass {
     const overrideMaterialValue = this.renderScene.overrideMaterial;
 
     if (this.isUsingSurfaceIds()) {
-    	// Render the "surface ID buffer"
-    	if (this.getDebugVisualizeValue() == 5) {
-    		this.renderScene.overrideMaterial = this.surfaceIdDebugOverrideMaterial
-    	} else {
-    		this.renderScene.overrideMaterial = this.surfaceIdOverrideMaterial;
-    	}
+      // Render the "surface ID buffer"
+      if (this.getDebugVisualizeValue() == 5) {
+        this.renderScene.overrideMaterial = this.surfaceIdDebugOverrideMaterial;
+      } else {
+        this.renderScene.overrideMaterial = this.surfaceIdOverrideMaterial;
+      }
     } else {
-    	// Render normal buffer
-	    this.renderScene.overrideMaterial = this.normalOverrideMaterial;
+      // Render normal buffer
+      this.renderScene.overrideMaterial = this.normalOverrideMaterial;
     }
-    
+
     renderer.render(this.renderScene, this.renderCamera);
     this.renderScene.overrideMaterial = overrideMaterialValue;
 
@@ -261,8 +266,8 @@ class CustomOutlinePass extends Pass {
         surfaceBuffer: {},
         outlineColor: { value: new THREE.Color(0xffffff) },
         //4 scalar values packed in one uniform: depth multiplier, depth bias, and same for normals.
-        multiplierParameters: { 
-        	value: new THREE.Vector4(0.9, 20, 1, 1) 
+        multiplierParameters: {
+          value: new THREE.Vector4(0.9, 20, 1, 1),
         },
         cameraNear: { value: this.renderCamera.near },
         cameraFar: { value: this.renderCamera.far },

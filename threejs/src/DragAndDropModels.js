@@ -47,6 +47,6 @@ export default function DragAndDropModels(scene, dropZoneElement, onDrop) {
     const ext = getExtension(entryFile.name);
     const fileUrl = URL.createObjectURL(entryFile);
 
-    onDrop(fileUrl)
+    onDrop(fileUrl);
   };
 }
