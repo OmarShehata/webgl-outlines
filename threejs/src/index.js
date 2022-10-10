@@ -9,8 +9,11 @@ import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader.js";
 import { CustomOutlinePass } from "./CustomOutlinePass.js";
 import DragAndDropModels from "./DragAndDropModels.js";
 import FindSurfaces from "./FindSurfaces.js";
+import SketchfabIntegration from "./SketchfabIntegration.js";
 
 const GUI = dat.GUI;
+const sketchfabIntegration = new SketchfabIntegration();
+sketchfabIntegration.checkToken();
 
 // Init scene
 const camera = new THREE.PerspectiveCamera(
@@ -67,7 +70,7 @@ composer.addPass(effectFXAA);
 const surfaceFinder = new FindSurfaces();
 // Load model
 const loader = new GLTFLoader();
-const model = "box_with_plane.glb";
+const model = "https://cdn.glitch.global/05f04c33-fc24-481c-af64-7db4a57573cd/box_with_plane.glb?v=1665350143476";
 loader.load(model, (gltf) => {
   scene.add(gltf.scene);
   addSurfaceIdAttributeToMesh(gltf.scene);
@@ -184,3 +187,32 @@ DragAndDropModels(scene, dropZoneElement, (modelUrl) => {
     addSurfaceIdAttributeToMesh(gltf.scene);
   });
 });
+
+sketchfabIntegration.postLoad = (mesh) => {
+  addSurfaceIdAttributeToMesh(mesh);
+}
+
+// Add Sketchfab integration buttons to GUI
+const sketchfabFolder = gui.addFolder("Sketchfab");
+const sfParams = {
+  "Sketchfab URL": ""
+};
+
+let loginButtonName = "Login to Sketchfab";
+if (sketchfabIntegration.token != null) {
+  let lastValue;
+  sketchfabFolder
+    .add(sfParams, "Sketchfab URL")
+    .onChange(async function (value) {
+      if (lastValue != value) {
+        lastValue = value;
+        sketchfabIntegration.fetchAndDisplayModel(value, scene);
+      }
+    });
+  loginButtonName = "Re-login to Sketchfab";
+}
+
+const sketchfabOptions = {};
+sketchfabOptions[loginButtonName] = sketchfabIntegration.authenticate;
+sketchfabFolder.add(sketchfabOptions, loginButtonName);
+sketchfabFolder.open();

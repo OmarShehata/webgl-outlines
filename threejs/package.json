@@ -9,10 +9,11 @@
     "prettier": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
+    "jszip": "^3.10.1",
     "three": "^0.143.0"
   },
   "devDependencies": {
-    "vite": "^2.7.2",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "vite": "^2.7.2"
   }
 }

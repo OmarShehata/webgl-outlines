@@ -20,7 +20,7 @@ export default function DragAndDropModels(scene, dropZoneElement, onDrop) {
 
   dropZoneElement.ondrop = function (event) {
     event.preventDefault();
-    const files = [];
+    let files = [];
     if (event.dataTransfer.items) {
       // Use DataTransferItemList interface to access the file(s)
       for (var i = 0; i < event.dataTransfer.items.length; i++) {

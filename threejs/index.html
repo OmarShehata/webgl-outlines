@@ -10,10 +10,64 @@
         padding: 0px;
         overflow: hidden;
       }
+      #overlay {
+        width: 100%;
+        height: 100%;
+        background: #000000b3;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        color: white;
+        text-align: center;
+      }
+      .error {
+        color: red;
+      }
+      #fetch-success,
+      #download-error,
+      #unknown-error,
+      #dimiss-btn {
+        display: none;
+      }
+      #overlay {
+        display: none;
+      }
+      #attribution-container {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        color: white;
+      }
+      #attribution-container a {
+        color: white;
+      }
     </style>
   </head>
   <body>
     <canvas></canvas>
+    <div id="overlay">
+      <h3>
+        Getting model from Sketchfab...
+      </h3>
+      <h3 id="fetch-success">
+        Successfully fetched model! Loading into the viewer now...
+      </h3>
+      <h3 class="error" id="download-error">
+        Failed to download this model. Make sure you have access to download
+        this model on Sketchfab. Example URL:
+        https://sketchfab.com/3d-models/low-poly-tree-6d986e0b24b54d85a5354e5cac6207a1
+      </h3>
+      <h3 class="error" id="unknown-error">
+        Failed to load this model, unknown error. Check the browser console for
+        more details.
+      </h3>
+      <center>
+        <button id="dimiss-btn">Dismiss</button>
+      </center>
+    </div>
+
+    <div id="attribution-container"></div>
     <script type="module" src="./src/index.js"></script>
   </body>
 </html>
