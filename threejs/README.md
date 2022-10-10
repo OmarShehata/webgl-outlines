@@ -1,6 +1,6 @@
 # Rendering outlines in ThreeJS
 
-This is the ThreeJS implementation of [How to render outlines in WebGL](https://omar-shehata.medium.com/how-to-render-outlines-in-webgl-8253c14724f9). See a [live demo on CodeSandbox](https://l01dp.csb.app/). 
+This is the ThreeJS implementation of [How to render outlines in WebGL](https://omar-shehata.medium.com/how-to-render-outlines-in-webgl-8253c14724f9). See a [live demo](https://threejs-outlines-postprocess.glitch.me/). 
 
 This contains two implementations: v1 uses the depth & normal buffer. v2 uses the depth & "surface ID" buffer. See [TODO](TODO) for an explanation of the v2 technique.
 
