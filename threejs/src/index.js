@@ -86,7 +86,7 @@ function addSurfaceIdAttributeToMesh(scene) {
     }
   });
 
-  customOutline.updateMaxSurfaceId(surfaceFinder.surfaceId);
+  customOutline.updateMaxSurfaceId(surfaceFinder.surfaceId + 1);
 }
 
 // Set up orbital camera controls.

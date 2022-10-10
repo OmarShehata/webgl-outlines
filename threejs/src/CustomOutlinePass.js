@@ -9,7 +9,7 @@ import {
 // Follows the structure of
 // 		https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/OutlinePass.js
 class CustomOutlinePass extends Pass {
-  constructor(resolution, scene, camera, maxSurfaceId) {
+  constructor(resolution, scene, camera) {
     super();
 
     this.renderScene = scene;
