@@ -17,7 +17,7 @@ Or click "Login to Sketchfab" and paste in any Sketchfab model URL, such as: htt
 
 ### Source code
 
-* [ThreeJS version](threejs-outlines-minimal/README.md)
+* [ThreeJS version](threejs-outlines-minimal/)
 * [ThreeJS version with debug visualizations](threejs/README.md) <-- this is the source code for the live demo that contains all the parameters in the GUI
 * [PlayCanvas version](playcanvas/README.md)
 
