@@ -190,7 +190,7 @@ class CustomOutlinePass extends Pass {
 
 				if (surfaceValueDiff != 0.0) surfaceValueDiff = 1.0;
 
-				float outline = surfaceValueDiff + depthDiff;
+				float outline = saturate(surfaceValueDiff + depthDiff);
 			
 				// Combine outline with scene color.
 				vec4 outlineColor = vec4(outlineColor, 1.0);
