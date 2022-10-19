@@ -81,7 +81,7 @@ loader.load(model, (gltf) => {
     }
   });
 
-  customOutline.updateMaxSurfaceId(surfaceFinder.surfaceId);
+  customOutline.updateMaxSurfaceId(surfaceFinder.surfaceId + 1);
 });
 
 // Set up orbital camera controls.
@@ -103,5 +103,9 @@ function onWindowResize() {
   composer.setSize(window.innerWidth, window.innerHeight);
   effectFXAA.setSize(window.innerWidth, window.innerHeight);
   customOutline.setSize(window.innerWidth, window.innerHeight);
+  effectFXAA.uniforms["resolution"].value.set(
+    1 / window.innerWidth,
+    1 / window.innerHeight
+  );
 }
 window.addEventListener("resize", onWindowResize, false);

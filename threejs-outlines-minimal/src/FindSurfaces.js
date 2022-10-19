@@ -160,7 +160,9 @@ function getFragmentShader() {
 
   void main() {
     // Normalize the surfaceId when writing to texture
-    float surfaceId = vColor.r / maxSurfaceId;
+    // Surface ID needs rounding as precision can be lost in perspective correct interpolation 
+    // - see https://github.com/OmarShehata/webgl-outlines/issues/9 for other solutions eg. flat interpolation.
+    float surfaceId = round(vColor.r) / maxSurfaceId;
     gl_FragColor = vec4(surfaceId, 0.0, 0.0, 1.0);
   }
   `;

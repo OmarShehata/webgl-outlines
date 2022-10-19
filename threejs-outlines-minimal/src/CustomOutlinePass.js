@@ -8,7 +8,7 @@ import {
 // Follows the structure of
 // 		https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/OutlinePass.js
 class CustomOutlinePass extends Pass {
-  constructor(resolution, scene, camera, maxSurfaceId) {
+  constructor(resolution, scene, camera) {
     super();
 
     this.renderScene = scene;
@@ -190,7 +190,7 @@ class CustomOutlinePass extends Pass {
 
 				if (surfaceValueDiff != 0.0) surfaceValueDiff = 1.0;
 
-				float outline = surfaceValueDiff + depthDiff;
+				float outline = saturate(surfaceValueDiff + depthDiff);
 			
 				// Combine outline with scene color.
 				vec4 outlineColor = vec4(outlineColor, 1.0);
