@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Vertex Welder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+    <style type="text/css">
+      html,
+      body {
+        margin: 0px;
+        padding: 0px;
+        overflow: hidden;
+      }
+      .label {
+        color: #FFF;
+        font-family: sans-serif;
+        background: rgba( 0, 0, 0, .6 );
+      }
+
+      #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        color: white;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script type="module" src="./src/index.js"></script>
+    <div id="overlay">
+      <h2>🔥 welded</h2>
+    </div>
+  </body>
+</html>
