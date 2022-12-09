@@ -146,7 +146,7 @@ class CustomOutlinePass extends Pass {
 				return val;
 			}
 
-			float saturate(float num) {
+			float saturateValue(float num) {
 				return clamp(num, 0.0, 1.0);
 			}
 
@@ -185,12 +185,12 @@ class CustomOutlinePass extends Pass {
 				float depthMultiplier = multiplierParameters.y;
 
 				depthDiff = depthDiff * depthMultiplier;
-				depthDiff = saturate(depthDiff);
+				depthDiff = saturateValue(depthDiff);
 				depthDiff = pow(depthDiff, depthBias);
 
 				if (surfaceValueDiff != 0.0) surfaceValueDiff = 1.0;
 
-				float outline = saturate(surfaceValueDiff + depthDiff);
+				float outline = saturateValue(surfaceValueDiff + depthDiff);
 			
 				// Combine outline with scene color.
 				vec4 outlineColor = vec4(outlineColor, 1.0);

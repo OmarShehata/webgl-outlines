@@ -52,7 +52,7 @@ Object.assign(pc, function () {
                 vec3 getPixelNormal(int x, int y) {
                     return texture2D(uNormalBuffer, vUv0 + uScreenSize.zw * vec2(x, y)).rgb;
                 }
-                float saturate(float num) {
+                float saturateValue(float num) {
                     return clamp(num, 0.0, 1.0);
                 }
 
@@ -89,11 +89,11 @@ Object.assign(pc, function () {
                     float normalMultiplier = uMultiplierParameters.w;
 
                     depthDiff = depthDiff * depthMultiplier;
-                    depthDiff = saturate(depthDiff);
+                    depthDiff = saturateValue(depthDiff);
                     depthDiff = pow(depthDiff, depthBias);
 
                     normalDiff = normalDiff * normalMultiplier;
-                    normalDiff = saturate(normalDiff);
+                    normalDiff = saturateValue(normalDiff);
                     normalDiff = pow(normalDiff, normalBias);
 
                     float outline = normalDiff + depthDiff;
